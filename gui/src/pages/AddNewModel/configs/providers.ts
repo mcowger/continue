@@ -58,6 +58,39 @@ let openRouterModelsList: ModelPackage[] = [OPENROUTER_LOADING_PLACEHOLDER];
  * Initialize OpenRouter models by fetching from the API
  * This should be called once when the component mounts
  */
+export async function initializeSyntheticModels() {
+  try {
+    const models = await getOpenRouterModelsList();
+    if (models.length > 0) {
+      openRouterModelsList = models;
+      // Update the providers object with the fetched models
+      if (providers.openrouter) {
+        providers.openrouter.packages = openRouterModelsList;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to initialize OpenRouter models:", error);
+    // Keep placeholder on error so the UI doesn't break
+  }
+}
+
+// Initialize OpenRouter models placeholder with a loading placeholder
+const SYNTHETIC_LOADING_PLACEHOLDER: ModelPackage = {
+  title: "Loading models...",
+  description: "Fetching available models from Synthetic",
+  params: {
+    model: "placeholder",
+    contextLength: 0,
+  },
+  isOpenSource: false,
+};
+
+let syntheticModelsList: ModelPackage[] = [OPENROUTER_LOADING_PLACEHOLDER];
+
+/**
+ * Initialize OpenRouter models by fetching from the API
+ * This should be called once when the component mounts
+ */
 export async function initializeOpenRouterModels() {
   try {
     const models = await getOpenRouterModelsList();
@@ -225,6 +258,28 @@ export const providers: Partial<Record<string, ProviderInfo>> = {
       ...completionParamsInputsConfigs,
     ],
     packages: openRouterModelsList,
+  },
+  synthetic: {
+    title: "Synthetic",
+    provider: "Synthetic",
+    description:
+      "Use Synthetic to chat with thousands of open-weight models, including over 20 always-on frontier models",
+    longDescription: `Use your Synthetic account with Continue.dev.  To get started with Synthetic, sign up for an account at [synthetic.new](https://synthetic.new/) and obtain your API key from the dashboard.`,
+    icon: "synthetic.png",
+    tags: [ModelProviderTags.RequiresApiKey],
+    refPage: "openrouter",
+    apiKeyUrl: "https://synthetic.new/user-settings/api",
+    collectInputFor: [
+      {
+        inputType: "text",
+        key: "apiKey",
+        label: "API Key",
+        placeholder: "Enter your Synthetic API key",
+        required: true,
+      },
+      ...completionParamsInputsConfigs,
+    ],
+    packages: syntheticModelsList,
   },
 
   moonshot: {

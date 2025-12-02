@@ -54,6 +54,7 @@ export function AddModelForm({
     providers["azure"]?.title || "",
     providers["ollama"]?.title || "",
     providers["openrouter"]?.title || "",
+    providers["synthetic"]?.title || "",
   ];
 
   const allProviders = Object.entries(providers)
