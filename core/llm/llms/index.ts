@@ -31,10 +31,10 @@ import HuggingFaceTEIEmbeddingsProvider from "./HuggingFaceTEI";
 import HuggingFaceTGI from "./HuggingFaceTGI";
 import Inception from "./Inception";
 import Kindo from "./Kindo";
+import Lemonade from "./Lemonade";
 import LlamaCpp from "./LlamaCpp";
 import Llamafile from "./Llamafile";
 import LlamaStack from "./LlamaStack";
-import Lemonade from "./Lemonade";
 import LMStudio from "./LMStudio";
 import Mistral from "./Mistral";
 import MockLLM from "./Mock";
@@ -55,6 +55,7 @@ import SambaNova from "./SambaNova";
 import Scaleway from "./Scaleway";
 import SiliconFlow from "./SiliconFlow";
 import ContinueProxy from "./stubs/ContinueProxy";
+import Synthetic from "./Synthetic";
 import TARS from "./TARS";
 import TestLLM from "./Test";
 import TextGenWebUI from "./TextGenWebUI";
@@ -122,6 +123,7 @@ export const LLMClasses = [
   Voyage,
   LlamaStack,
   TARS,
+  Synthetic,
 ];
 
 export async function llmFromDescription(

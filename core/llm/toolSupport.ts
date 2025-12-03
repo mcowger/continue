@@ -102,6 +102,10 @@ export const PROVIDER_TOOL_SUPPORT: Record<string, (model: string) => boolean> =
         lowerCaseModel.includes(val),
       );
     },
+    synthetic: (model) => {
+      // All synthetic chat models support tool use
+      return true;
+    },
     bedrock: (model) => {
       if (model.includes("claude-2") || model.includes("claude-instant")) {
         return false;

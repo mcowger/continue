@@ -66,6 +66,7 @@ const PROVIDER_HANDLES_TEMPLATING: string[] = [
   "openrouter",
   "deepseek",
   "xAI",
+  "synthetic",
   "groq",
   "gemini",
   "docker",

@@ -10,6 +10,7 @@ import { completionParamsInputs } from "../pages/AddNewModel/configs/completionP
 import { DisplayInfo } from "../pages/AddNewModel/configs/models";
 import {
   initializeOpenRouterModels,
+  initializeSyntheticModels,
   ProviderInfo,
   providers,
 } from "../pages/AddNewModel/configs/providers";
@@ -44,6 +45,7 @@ export function AddModelForm({
   // Initialize OpenRouter models from API on component mount
   useEffect(() => {
     void initializeOpenRouterModels();
+    void initializeSyntheticModels();
   }, []);
 
   const popularProviderTitles = [

@@ -4,6 +4,7 @@ import { completionParamsInputs } from "./completionParamsInputs";
 import type { ModelPackage } from "./models";
 import { models } from "./models";
 import { getOpenRouterModelsList } from "./openRouterModel";
+import { getSyntheticModelsList } from "./syntheticModel";
 
 export interface InputDescriptor {
   inputType: HTMLInputTypeAttribute;
@@ -41,52 +42,6 @@ const openSourceModels = Object.values(models).filter(
   ({ isOpenSource }) => isOpenSource,
 );
 
-// Initialize OpenRouter models placeholder with a loading placeholder
-const OPENROUTER_LOADING_PLACEHOLDER: ModelPackage = {
-  title: "Loading models...",
-  description: "Fetching available models from OpenRouter",
-  params: {
-    model: "placeholder",
-    contextLength: 0,
-  },
-  isOpenSource: false,
-};
-
-let openRouterModelsList: ModelPackage[] = [OPENROUTER_LOADING_PLACEHOLDER];
-
-/**
- * Initialize OpenRouter models by fetching from the API
- * This should be called once when the component mounts
- */
-export async function initializeSyntheticModels() {
-  try {
-    const models = await getOpenRouterModelsList();
-    if (models.length > 0) {
-      openRouterModelsList = models;
-      // Update the providers object with the fetched models
-      if (providers.openrouter) {
-        providers.openrouter.packages = openRouterModelsList;
-      }
-    }
-  } catch (error) {
-    console.error("Failed to initialize OpenRouter models:", error);
-    // Keep placeholder on error so the UI doesn't break
-  }
-}
-
-// Initialize OpenRouter models placeholder with a loading placeholder
-const SYNTHETIC_LOADING_PLACEHOLDER: ModelPackage = {
-  title: "Loading models...",
-  description: "Fetching available models from Synthetic",
-  params: {
-    model: "placeholder",
-    contextLength: 0,
-  },
-  isOpenSource: false,
-};
-
-let syntheticModelsList: ModelPackage[] = [OPENROUTER_LOADING_PLACEHOLDER];
-
 /**
  * Initialize OpenRouter models by fetching from the API
  * This should be called once when the component mounts
@@ -106,6 +61,52 @@ export async function initializeOpenRouterModels() {
     // Keep placeholder on error so the UI doesn't break
   }
 }
+
+// Initialize OpenRouter models placeholder with a loading placeholder
+const OPENROUTER_LOADING_PLACEHOLDER: ModelPackage = {
+  title: "Loading models...",
+  description: "Fetching available models from OpenRouter",
+  params: {
+    model: "placeholder",
+    contextLength: 0,
+  },
+  isOpenSource: false,
+};
+
+let openRouterModelsList: ModelPackage[] = [OPENROUTER_LOADING_PLACEHOLDER];
+
+/**
+ * Initialize OpenRouter models by fetching from the API
+ * This should be called once when the component mounts
+ */
+export async function initializeSyntheticModels() {
+  try {
+    const models = await getSyntheticModelsList();
+    if (models.length > 0) {
+      syntheticModelsList = models;
+      // Update the providers object with the fetched models
+      if (providers.synthetic) {
+        providers.synthetic.packages = syntheticModelsList;
+      }
+    }
+  } catch (error) {
+    console.error("Failed to initialize Synthetic models:", error);
+    // Keep placeholder on error so the UI doesn't break
+  }
+}
+
+// Initialize OpenRouter models placeholder with a loading placeholder
+const SYNTHETIC_LOADING_PLACEHOLDER: ModelPackage = {
+  title: "Loading models...",
+  description: "Fetching available models from Synthetic",
+  params: {
+    model: "placeholder",
+    contextLength: 0,
+  },
+  isOpenSource: true,
+};
+
+let syntheticModelsList: ModelPackage[] = [SYNTHETIC_LOADING_PLACEHOLDER];
 
 export const apiBaseInput: InputDescriptor = {
   inputType: "text",
