@@ -2,7 +2,7 @@
 docs/docs/languages
 .changes/
 .idea/
-.vscode/
+
 .archive/
 **/*.scm
 **/*.diff
