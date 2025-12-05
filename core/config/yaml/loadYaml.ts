@@ -24,7 +24,6 @@ import {
 } from "../..";
 import { MCPManagerSingleton } from "../../context/mcp/MCPManagerSingleton";
 import { ControlPlaneClient } from "../../control-plane/client";
-import TransformersJsEmbeddingsProvider from "../../llm/llms/TransformersJsEmbeddingsProvider";
 import { getAllPromptFiles } from "../../promptFiles/getPromptFiles";
 import { GlobalContext } from "../../util/GlobalContext";
 import { modifyAnyConfigWithSharedConfig } from "../sharedConfig";
@@ -183,18 +182,14 @@ export async function configYamlToContinueConfig(options: {
       chat: [],
       edit: [],
       apply: [],
-      embed: [],
       autocomplete: [],
-      rerank: [],
       summarize: [],
     },
     selectedModelByRole: {
       chat: null,
       edit: null, // not currently used
       apply: null,
-      embed: null,
       autocomplete: null,
-      rerank: null,
       summarize: null,
     },
     rules: [],
@@ -311,46 +306,12 @@ export async function configYamlToContinueConfig(options: {
       if (model.roles?.includes("autocomplete")) {
         continueConfig.modelsByRole.autocomplete.push(...llms);
       }
-
-      if (model.roles?.includes("embed")) {
-        const { provider } = model;
-        if (provider === "transformers.js") {
-          if (ideInfo.ideType === "vscode") {
-            continueConfig.modelsByRole.embed.push(
-              new TransformersJsEmbeddingsProvider(),
-            );
-          } else {
-            localErrors.push({
-              fatal: false,
-              message: `Transformers.js embeddings provider not supported in this IDE.`,
-            });
-          }
-        } else {
-          continueConfig.modelsByRole.embed.push(...llms);
-        }
-      }
-
-      if (model.roles?.includes("rerank")) {
-        continueConfig.modelsByRole.rerank.push(...llms);
-      }
     } catch (e) {
       localErrors.push({
         fatal: false,
         message: `Failed to load model:\nName: ${model.name}\nModel: ${model.model}\nProvider: ${model.provider}\n${e instanceof Error ? e.message : e}`,
       });
     }
-  }
-
-  // Add transformers js to the embed models in vs code if not already added
-  if (
-    ideInfo.ideType === "vscode" &&
-    !continueConfig.modelsByRole.embed.find(
-      (m) => m.providerName === "transformers.js",
-    )
-  ) {
-    continueConfig.modelsByRole.embed.push(
-      new TransformersJsEmbeddingsProvider(),
-    );
   }
 
   if (warnAboutFreeTrial) {

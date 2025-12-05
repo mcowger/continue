@@ -61,21 +61,6 @@ export interface IndexingProgressUpdate {
   warnings?: string[];
 }
 
-// This is more or less a V2 of IndexingProgressUpdate for docs etc.
-export interface IndexingStatus {
-  id: string;
-  type: "docs";
-  progress: number;
-  description: string;
-  status: "indexing" | "complete" | "paused" | "failed" | "aborted" | "pending";
-  embeddingsProviderId?: string;
-  isReindexing?: boolean;
-  debugInfo?: string;
-  title: string;
-  icon?: string;
-  url?: string;
-}
-
 export type PromptTemplateFunction = (
   history: ChatMessage[],
   otherData: Record<string, string>,

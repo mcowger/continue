@@ -8,10 +8,6 @@
  * we rarely ever need syntax highlighting outside of
  * creating a render of it.
  */
-import {
-  transformerNotationDiff,
-  transformerNotationHighlight,
-} from "@shikijs/transformers";
 import { JSDOM } from "jsdom";
 import {
   BundledLanguage,
@@ -218,7 +214,6 @@ export class CodeRenderer {
     return this.highlighter!.codeToHtml(annotatedCode, {
       lang: language,
       theme: this.currentTheme,
-      transformers: [transformerNotationHighlight(), transformerNotationDiff()],
     });
   }
 

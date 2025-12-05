@@ -18,7 +18,6 @@ import {
   ContinueConfig,
   ContinueRcJson,
   CustomContextProvider,
-  EmbeddingsProviderDescription,
   IDE,
   IdeInfo,
   IdeSettings,
@@ -26,9 +25,7 @@ import {
   ILLM,
   ILLMLogger,
   InternalMcpOptions,
-  LLMOptions,
   ModelDescription,
-  RerankerDescription,
   SerializedContinueConfig,
   SlashCommandWithSource,
 } from "..";
@@ -38,10 +35,8 @@ import { slashCommandFromPromptFile } from "../commands/slash/promptFileSlashCom
 import { MCPManagerSingleton } from "../context/mcp/MCPManagerSingleton";
 import { useHub } from "../control-plane/env";
 import { BaseLLM } from "../llm";
-import { LLMClasses, llmFromDescription } from "../llm/llms";
+import { llmFromDescription } from "../llm/llms";
 import CustomLLMClass from "../llm/llms/CustomLLM";
-import { LLMReranker } from "../llm/llms/llm";
-import TransformersJsEmbeddingsProvider from "../llm/llms/TransformersJsEmbeddingsProvider";
 import { getAllPromptFiles } from "../promptFiles/getPromptFiles";
 import { copyOf } from "../util";
 import { GlobalContext } from "../util/GlobalContext";
@@ -408,90 +403,6 @@ async function intermediateToFinalConfig({
   }
   errors.push(...contextErrors);
 
-  // Embeddings Provider
-  function getEmbeddingsILLM(
-    embedConfig: EmbeddingsProviderDescription | ILLM | undefined,
-  ): ILLM | null {
-    if (embedConfig) {
-      // config.ts-injected ILLM
-      if ("providerName" in embedConfig) {
-        return embedConfig;
-      }
-      const { provider, ...options } = embedConfig;
-      if (provider === "transformers.js" || provider === "free-trial") {
-        if (provider === "free-trial") {
-          warnAboutFreeTrial = true;
-        }
-        return new TransformersJsEmbeddingsProvider();
-      } else {
-        const cls = LLMClasses.find((c) => c.providerName === provider);
-        if (cls) {
-          const llmOptions: LLMOptions = {
-            model: options.model ?? "UNSPECIFIED",
-            ...options,
-          };
-          return new cls(llmOptions);
-        } else {
-          errors.push({
-            fatal: false,
-            message: `Embeddings provider ${provider} not found`,
-          });
-        }
-      }
-    }
-    if (ideInfo.ideType === "vscode") {
-      return new TransformersJsEmbeddingsProvider();
-    }
-    return null;
-  }
-  const newEmbedder = getEmbeddingsILLM(config.embeddingsProvider);
-
-  // Reranker
-  function getRerankingILLM(
-    rerankingConfig: ILLM | RerankerDescription | undefined,
-  ): ILLM | null {
-    if (!rerankingConfig) {
-      return null;
-    }
-    // config.ts-injected ILLM
-    if ("providerName" in rerankingConfig) {
-      return rerankingConfig;
-    }
-    const { name, params } = config.reranker as RerankerDescription;
-    if (name === "free-trial") {
-      warnAboutFreeTrial = true;
-      return null;
-    }
-    if (name === "llm") {
-      const llm = models.find((model) => model.title === params?.modelTitle);
-      if (!llm) {
-        errors.push({
-          fatal: false,
-          message: `Unknown reranking model ${params?.modelTitle}`,
-        });
-        return null;
-      } else {
-        return new LLMReranker(llm);
-      }
-    } else {
-      const cls = LLMClasses.find((c) => c.providerName === name);
-      if (cls) {
-        const llmOptions: LLMOptions = {
-          model: params?.model ?? "UNSPECIFIED",
-          ...params,
-        };
-        return new cls(llmOptions);
-      } else {
-        errors.push({
-          fatal: false,
-          message: `Unknown reranking provider ${name}`,
-        });
-      }
-    }
-    return null;
-  }
-  const newReranker = getRerankingILLM(config.reranker);
-
   if (warnAboutFreeTrial) {
     errors.push({
       fatal: false,
@@ -512,16 +423,12 @@ async function intermediateToFinalConfig({
       apply: models,
       summarize: models,
       autocomplete: [...tabAutocompleteModels],
-      embed: newEmbedder ? [newEmbedder] : [],
-      rerank: newReranker ? [newReranker] : [],
     },
     selectedModelByRole: {
       chat: null, // Not implemented (uses GUI defaultModel)
       edit: null,
       apply: null,
-      embed: newEmbedder ?? null,
       autocomplete: null,
-      rerank: newReranker ?? null,
       summarize: null, // Not implemented
     },
     rules: [],
@@ -609,18 +516,6 @@ async function intermediateToFinalConfig({
         message: `experimental.modelRoles.applyCodeBlock model title ${inlineEditModel} not found in models array`,
       });
     }
-  }
-
-  // Add transformers JS to the embed models list if not already added
-  if (
-    ideInfo.ideType === "vscode" &&
-    !continueConfig.modelsByRole.embed.find(
-      (m) => m.providerName === "transformers.js",
-    )
-  ) {
-    continueConfig.modelsByRole.embed.push(
-      new TransformersJsEmbeddingsProvider(),
-    );
   }
 
   return { config: continueConfig, errors };
