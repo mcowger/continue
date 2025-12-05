@@ -18,7 +18,6 @@ const { generateAndCopyConfigYamlSchema } = require("./generate-copy-config");
 const { npmInstall } = require("./npm-install");
 const {
   buildGui,
-  copyOnnxRuntimeFromNodeModules,
   copyTreeSitterWasms,
   copyNodeModules,
   downloadRipgrepBinary,
@@ -88,10 +87,6 @@ async function package(target, os, arch, exe) {
   // Copy tree-sitter-wasm files
   await copyTreeSitterWasms();
 
-  // Install and copy over native modules
-  // *** onnxruntime-node ***
-  await copyOnnxRuntimeFromNodeModules(target);
-
   // copy llama tokenizers to out
   copyTokenizers();
 
@@ -135,16 +130,6 @@ async function package(target, os, arch, exe) {
     // Queries used for @outline and @highlights context providers
     "tag-qry/tree-sitter-c_sharp-tags.scm",
 
-    // onnx runtime bindngs
-    `bin/napi-v3/${os}/${arch}/onnxruntime_binding.node`,
-    `bin/napi-v3/${os}/${arch}/${
-      os === "darwin"
-        ? "libonnxruntime.1.14.0.dylib"
-        : os === "linux"
-          ? "libonnxruntime.so.1.14.0"
-          : "onnxruntime.dll"
-    }`,
-
     // Code/styling for the sidebar
     "gui/assets/index.js",
     "gui/assets/index.css",
@@ -153,14 +138,6 @@ async function package(target, os, arch, exe) {
     "media/move-chat-panel-right.md",
     "continue_tutorial.py",
     "config_schema.json",
-
-    // Embeddings model
-    "models/all-MiniLM-L6-v2/config.json",
-    "models/all-MiniLM-L6-v2/special_tokens_map.json",
-    "models/all-MiniLM-L6-v2/tokenizer_config.json",
-    "models/all-MiniLM-L6-v2/tokenizer.json",
-    "models/all-MiniLM-L6-v2/vocab.txt",
-    "models/all-MiniLM-L6-v2/onnx/model_quantized.onnx",
 
     // node_modules (it's a bit confusing why this is necessary)
     `node_modules/@vscode/ripgrep/bin/rg${exe}`,

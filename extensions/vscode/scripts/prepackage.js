@@ -120,67 +120,6 @@ void (async () => {
 
   fs.mkdirSync("bin", { recursive: true });
 
-  // onnxruntime-node
-  const onnxCopyStart = Date.now();
-  console.log(
-    `[timer] Starting onnxruntime copy at ${new Date().toISOString()}`,
-  );
-  await new Promise((resolve, reject) => {
-    ncp(
-      path.join(__dirname, "../../../core/node_modules/onnxruntime-node/bin"),
-      path.join(__dirname, "../bin"),
-      {
-        dereference: true,
-      },
-      (error) => {
-        if (error) {
-          console.warn("[info] Error copying onnxruntime-node files", error);
-          reject(error);
-        }
-        resolve();
-      },
-    );
-  });
-  console.log(
-    `[timer] onnxruntime copy completed in ${Date.now() - onnxCopyStart}ms`,
-  );
-  if (target) {
-    // If building for production, only need the binaries for current platform
-    try {
-      if (!target.startsWith("darwin")) {
-        rimrafSync(path.join(__dirname, "../bin/napi-v3/darwin"));
-      }
-      if (!target.startsWith("linux")) {
-        rimrafSync(path.join(__dirname, "../bin/napi-v3/linux"));
-      }
-      if (!target.startsWith("win")) {
-        rimrafSync(path.join(__dirname, "../bin/napi-v3/win32"));
-      }
-
-      // Also don't want to include cuda/shared/tensorrt binaries, they are too large
-      if (target.startsWith("linux")) {
-        const filesToRemove = [
-          "libonnxruntime_providers_cuda.so",
-          "libonnxruntime_providers_shared.so",
-          "libonnxruntime_providers_tensorrt.so",
-        ];
-        filesToRemove.forEach((file) => {
-          const filepath = path.join(
-            __dirname,
-            "../bin/napi-v3/linux/x64",
-            file,
-          );
-          if (fs.existsSync(filepath)) {
-            fs.rmSync(filepath);
-          }
-        });
-      }
-    } catch (e) {
-      console.warn("[info] Error removing unused binaries", e);
-    }
-  }
-  console.log("[info] Copied onnxruntime-node");
-
   // tree-sitter-wasm
   fs.mkdirSync("out", { recursive: true });
 
@@ -344,16 +283,6 @@ void (async () => {
     // Queries used for @outline and @highlights context providers
     "tag-qry/tree-sitter-c_sharp-tags.scm",
 
-    // onnx runtime bindngs
-    `bin/napi-v3/${os}/${arch}/onnxruntime_binding.node`,
-    `bin/napi-v3/${os}/${arch}/${
-      isMacTarget
-        ? "libonnxruntime.1.14.0.dylib"
-        : isLinuxTarget
-          ? "libonnxruntime.so.1.14.0"
-          : "onnxruntime.dll"
-    }`,
-
     // Code/styling for the sidebar
     "gui/assets/index.js",
     "gui/assets/index.css",
@@ -362,14 +291,6 @@ void (async () => {
     "media/move-chat-panel-right.md",
     "continue_tutorial.py",
     "config_schema.json",
-
-    // Embeddings model
-    "models/all-MiniLM-L6-v2/config.json",
-    "models/all-MiniLM-L6-v2/special_tokens_map.json",
-    "models/all-MiniLM-L6-v2/tokenizer_config.json",
-    "models/all-MiniLM-L6-v2/tokenizer.json",
-    "models/all-MiniLM-L6-v2/vocab.txt",
-    "models/all-MiniLM-L6-v2/onnx/model_quantized.onnx",
 
     // node_modules (it's a bit confusing why this is necessary)
     `node_modules/@vscode/ripgrep/bin/rg${exe}`,

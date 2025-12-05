@@ -12,7 +12,6 @@ The build process is otherwise defined entirely in `build.js`.
 - @lancedb/\*\*
 - esbuild?
 - @esbuild?
-- onnxruntime-node?
 
 ### List of dynamically imported modules
 
